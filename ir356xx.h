@@ -1,0 +1,66 @@
+#ifndef __IR356XX_H
+#define __IR356XX_H
+
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "vrm.h"
+
+#define IR356XX_I2C_BASE_ADDRESS_REG				0x12
+#define IR356XX_LOADLINE_CALIBRATION_REG			0x38
+#define IR356XX_SET_VOLTAGE_LOOP1_REG				0x6A
+#define IR356XX_SET_VOLTAGE_LOOP2_REG				0x6C
+#define IR356XX_VOLTAGE_OFFSET_LOOP1_REG			0x8D
+#define IR356XX_VOLTAGE_OFFSET_LOOP2_REG			0x8E
+#define IR356XX_IDENTIFICATION_REG					0x92
+#define IR356XX_GET_VOLTAGE_LOOP1_REG				0x9A
+#define IR356XX_GET_VOLTAGE_LOOP2_REG				0x9B
+#define IR356XX_GET_CURRENT_LOOP1_REG				0x9C
+#define IR356XX_GET_CURRENT_LOOP2_REG				0x9D
+#define IR356XX_GET_TEMP_LOOP1_REG					0x9E
+#define IR356XX_GET_TEMP_LOOP2_REG					0x9F
+
+#define IR356XX_PMBUS_TEMP_CURLOOP					0x8D
+#define IR356XX_PMBUS_TEMP_AUXLOOP					0x8E
+#define IR356XX_PMBUS_SET_I2C						0xD6
+#define IR356XX_PMBUS_READ_EFFICIENCY				0xD7
+
+
+#define IR356XX_IDENTIFICATION_VALUE				0x43
+
+#define IR356XX_MODEL_IR3563B						0x40
+#define IR356XX_MODEL_IR3564B						0x41
+#define IR356XX_MODEL_IR3565B						0x42
+#define IR356XX_MODEL_IR3566B						0x43
+#define IR356XX_MODEL_IR3567B						0x44
+#define IR356XX_MODEL_IR3570B						0x45
+#define IR356XX_MODEL_IR35201						0x4D
+#define IR356XX_MODEL_IR35203						0x4F
+#define IR356XX_MODEL_IR35204						0x50
+#define IR356XX_MODEL_IR35211						0x54
+#define IR356XX_MODEL_IR35217						0x5F
+#define IR356XX_MODEL_IR38163						0x63
+#define IR356XX_MODEL_IR38164						0x6D
+#define IR356XX_MODEL_IR38165						0x64
+#define IR356XX_MODEL_IR38263						0x65
+#define IR356XX_MODEL_IR38363						0x67
+#define IR356XX_MODEL_IR38365						0x68
+
+#define IR356XX_SUPPORTED_MODEL_COUNT				0x03
+
+const static uint8_t IR356XX_SUPPORTED_MODELS[IR356XX_SUPPORTED_MODEL_COUNT] =
+{
+	IR356XX_MODEL_IR3565B, IR356XX_MODEL_IR3567B
+};
+
+bool IR356XXDetectOld(AMDGPU *GPU, int *ret);
+uint32_t IR356XXDetect(AMDGPU *GPU, VRMController **VRMs);
+uint32_t IR356XXGetTemp(VRMController *VRM, uint32_t *Temp);
+uint32_t IR356XXSetVoltage(VRMController *VRM, float Voltage);
+uint32_t IR356XXGetVoltage(VRMController *VRM, float *VDDC);
+uint32_t IR356XXSetOutputIdx(VRMController *VRM, uint32_t Idx);
+uint32_t IR356XXGetOutputIdx(VRMController *VRM, uint32_t *Idx);
+uint32_t IR356XXSetOffset(VRMController *VRM, float Voltage);
+uint32_t IR356XXGetOffset(VRMController *VRM, float *VoltOffset);
+int IR356XXToggleVdroop(AMDGPU *GPU, bool Vdroop);
+#endif

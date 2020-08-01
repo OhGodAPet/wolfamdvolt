@@ -1,0 +1,17 @@
+#ifndef __IR35217_H
+#define __IR35217_H
+
+#include "vrm.h"
+
+#define MODEL_IR35217								0x5F
+
+#define IR35217_PMBUS_SET_I2C						0x62
+#define IR35217_GET_VOLTAGE_LOOP1_REG				0xB0
+#define IR35217_GET_VOLTAGE_LOOP2_REG				0xB1
+#define IR35217_SET_VOLTAGE_LOOP1_REG				0xE6
+#define IR35217_SET_VOLTAGE_OFFSET_LOOP1_REG		0xE1
+#define IR35217_SET_VOLTAGE_OFFSET_LOOP2_REG		0xE2
+
+uint32_t IR35217Detect(AMDGPU *GPU, VRMController **VRMs);
+
+#endif
