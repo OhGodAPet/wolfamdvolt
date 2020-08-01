@@ -18,7 +18,7 @@ void PrintUsage(char *BinName)
 	printf("If the selection options are used without modification options, then info is displayed.\n");
 }
 
-#define NEXT_ARG_CHECK() do { if(i == (argc - 1)) { printf("Argument \"%s\" requires a parameter.\n"); return(false); } } while(0)
+#define NEXT_ARG_CHECK() do { if(i == (argc - 1)) { printf("Argument \"%s\" requires a parameter.\n", argv[i]); return(false); } } while(0)
 
 bool ParseCmdLine(ArgsObj *Args, int argc, char **argv)
 {
