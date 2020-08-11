@@ -100,6 +100,8 @@ int main(int argc, char **argv)
 	{
 		case ACTION_SCAN:
 		{
+			bool DevicesFound[117] = { false };
+			
 			for(uint8_t addr = 0x03; addr < 0x78; ++addr)
 			{
 				bool bad = true;
@@ -112,7 +114,6 @@ int main(int argc, char **argv)
 				do
 				{
 					outval = (uint8_t)AMDI2CReadByte(CurGPU, reg, &Status);
-					//if((byte != off) && (ret && (!(I2CTXERRORCHK(ret)))))
 					if(((Status & I2C_STATUS_MASK) & I2C_DONE) && (!((Status & I2C_STATUS_MASK) & I2C_NACK)))
 					{
 						bad = false;
@@ -122,7 +123,17 @@ int main(int argc, char **argv)
 
 				if(bad) printf("Appears nothing interesting at 0x%02X. (Status: 0x%04X)\n", addr, Status);
 				else printf("Address 0x%02X looks like it has something!\nOffset 0x%02X returned 0x%02X! (Status: 0x%04X)\n", addr, reg, (uint8_t)outval, Status);
+				
+				DevicesFound[addr - 0x03] = !bad;
 			}
+			
+			printf("Summary - devices found:");
+			for(int i = 0; i < 117; ++i)
+			{
+				if(!(i & 0x0F)) putchar('\n');
+				if(DevicesFound[i]) printf("0x%02X ", i);
+			}
+			
 			break;
 		}
 		case ACTION_DUMP:
