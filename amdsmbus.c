@@ -447,7 +447,7 @@ int AMDSMBusReadBlock(AMDGPU *GPU, uint8_t cmd, uint8_t *len, uint8_t *ret)
 
 	I2CExecTX(GPU);
 
-	WriteMMIOReg(GPU, GPU->I2CGPIOAddrs.mmGENERIC_I2C_TRANSACTION, (3 << 16) | I2C_START | I2C_RW | I2C_STOP);
+	WriteMMIOReg(GPU, GPU->I2CGPIOAddrs.mmGENERIC_I2C_TRANSACTION, (3 << 16) | I2C_START | I2C_ACK_ON_READ | I2C_RW | I2C_STOP);
 	WriteMMIOReg(GPU, GPU->I2CGPIOAddrs.mmGENERIC_I2C_DATA, I2C_INDEX_WRITE | (((GPU->I2CAddress << 1) | 0x01) << 8));
 
 	I2CExecTX(GPU);
