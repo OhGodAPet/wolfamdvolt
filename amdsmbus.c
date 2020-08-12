@@ -454,6 +454,7 @@ int AMDSMBusReadBlock(AMDGPU *GPU, uint8_t cmd, uint8_t *len, uint8_t *ret)
 
 	WriteMMIOReg(GPU, GPU->I2CGPIOAddrs.mmGENERIC_I2C_DATA, I2C_INDEX_WRITE | I2C_INDEX(1) | I2C_DATA_RW);
 
+	*len = 0;
 	*len = (ReadMMIOReg(GPU, GPU->I2CGPIOAddrs.mmGENERIC_I2C_DATA) >> 8) & 0xFF;
 
 	if(*len >= 0xFF) return(-4);
@@ -557,4 +558,3 @@ uint32_t PECVal(const uint8_t *Packet, uint32_t PacketLen)
 
 	return(PEC);
 }
-
