@@ -13,6 +13,13 @@
 #include "up1801.h"
 #include "rt8894a.h"
 
+#ifdef _WIN32
+#include "atillk64.h"
+#include "driverbin.h"
+#include <windows.h>
+#include <winioctl.h>
+#endif
+
 /*
 void DumpGPUInfo(AMDGPU *GPU)
 {
@@ -166,8 +173,66 @@ HANDLE OpenDriverHandle(void)
 	return(INVALID_HANDLE_VALUE);
 }
 #elif defined(_WIN32)
+bool IsDriverServiceInstalled(HANDLE SCManager, HANDLE *Service)
+{
+	HANDLE ServiceHandle;
+	
+	ServiceHandle = OpenService(SCManager, "atillk64", SERVICE_START | DELETE | SERVICE_STOP);
+	
+	if(ServiceHandle)
+	{
+		*Service = ServiceHandle;
+		return(true);
+	}
+	
+	*Service = NULL;
+	return(false);
+}
+bool LoadDriver(HANDLE Service)
+{
+	return(StartService(Service, 0, NULL));
+}
+HANDLE InstallDriverService(HANDLE SCManager)
+{
+	HANDLE Service, DriverBin;
+	DWORD BytesWritten;
+	char PathBuf[256];
+	
+	GetTempPathA(255, PathBuf);
+	strncat(PathBuf, "\\atillk64.sys", 255);
+	
+	DriverBin = CreateFileA(PathBuf, GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	
+	if((!DriverBin) && (GetLastError() == ERROR_ALREADY_EXISTS))
+		DriverBin = CreateFileA(PathBuf, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	
+	WriteFile(DriverBin, atillk64_bin, DRIVER_BIN_SIZE, &BytesWritten, NULL);
+
+	if(BytesWritten != DRIVER_BIN_SIZE)
+	{
+		CloseHandle(DriverBin);
+		return(NULL);
+	}
+	
+	Service = CreateService(SCManager, "atillk64", "AMD Diagnostics Utility", SERVICE_START | DELETE | SERVICE_STOP, SERVICE_KERNEL_DRIVER, SERVICE_DEMAND_START, SERVICE_ERROR_IGNORE, PathBuf, NULL, NULL, NULL, NULL, NULL);
+	
+	return(Service);
+}
 HANDLE OpenDriverHandle(void)
 {
+	HANDLE SCManager;
+	HANDLE DrvService;
+	SCManager = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
+
+	if(!IsDriverServiceInstalled(SCManager, &DrvService))
+	{
+		printf("Driver is not installed. Installing driver...\n");
+		DrvService = InstallDriverService(SCManager);
+	}
+
+	if(!DrvService) abort();
+	
+	printf("LoadDriver returned %d.\n", LoadDriver(DrvService));
 	return(CreateFileA("\\\\.\\atillk64", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL));
 }
 #endif
@@ -188,8 +253,23 @@ int main(int argc, char **argv)
 	VRMIdx = Config.VRMIdxProvided ? Config.VRMIdx : 0;
 	VRMOutputIdx = Config.VRMOutputIdxProvided ? Config.VRMOutputIdx : 0;
 	
+	GPUList = NULL;
 	I2CDebugOutput = Config.Debug;
 	DrvHandle = OpenDriverHandle();
+
+	#ifdef _WIN32
+	if(DrvHandle == INVALID_HANDLE_VALUE)
+	{
+		char ErrorMsg[256];
+		printf("Unable to open handle.\n");
+
+		FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), ErrorMsg, sizeof(ErrorMsg), NULL);
+		printf("Details: %s\n", ErrorMsg);
+		
+		return(-1);
+	}
+	#endif
+
 	GPUCount = FindAMDGPUs(&GPUList, DrvHandle);
 	
 	if(!Config.GPUIdxProvided)
@@ -422,4 +502,3 @@ int main(int argc, char **argv)
 	
 	return(0);
 }
-		
