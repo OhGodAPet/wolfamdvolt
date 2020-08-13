@@ -56,7 +56,7 @@ struct _AMDGPU
 	HANDLE MMIOHandle;
 	#endif
 	
-	I2CPINS I2CPins;
+	I2CPINS *I2CPins;
 	I2CGPIO I2CGPIOAddrs;
 	VRMController *VRMs;
 	

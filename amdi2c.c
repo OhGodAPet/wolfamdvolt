@@ -112,7 +112,7 @@ void AMDGPUI2CInit(AMDGPU *GPU, uint8_t bus, uint8_t addr)
 		GPU->I2CGPIOAddrs = GCN3_I2C_GPIO_ADDRS;
 	}
 	
-	if(bus > 0x07) GPU->I2CPins = GCN3_HWI2C_PINS;
+	if(bus > 0x07) GPU->I2CPins = GCN3_I2C_BUS_LINES[0];		// HWI2C
 	else GPU->I2CPins = GCN3_I2C_BUS_LINES[bus];
 	
 	AMDI2CReset(GPU);
@@ -124,7 +124,7 @@ void AMDGPUI2CInit(AMDGPU *GPU, uint8_t bus, uint8_t addr)
 	WriteMMIOReg(GPU, GPU->I2CGPIOAddrs.mmGENERIC_I2C_INTERRUPT_CONTROL, 0x00);
 	
 	// Select pins
-	WriteMMIOReg(GPU, GPU->I2CGPIOAddrs.mmGENERIC_I2C_PIN_SELECTION, (GPU->I2CPins.SDA << 8) | GPU->I2CPins.SCL);
+	WriteMMIOReg(GPU, GPU->I2CGPIOAddrs.mmGENERIC_I2C_PIN_SELECTION, (GPU->I2CPins->SDA << 8) | GPU->I2CPins->SCL);
 	
 	//WriteMMIOReg(GPU, GPU->I2CGPIOAddrs.mmGENERIC_I2C_SPEED, ((0x021C << 16) | 0x02));
 	//WriteMMIOReg(GPU, GPU->I2CGPIOAddrs.mmGENERIC_I2C_SPEED, ((0x010E << 16) | 0x02));

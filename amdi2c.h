@@ -1,30 +1,22 @@
 #ifndef __AMDI2C_H
 #define __AMDI2C_H
 
+#include <stdint.h>
 #include "amdgpu.h"
 
 //#define GPIO_PIN_SCL							0x29 	//0x4D
 //#define GPIO_PIN_SDA							0x28	//0x4C
 
-static const I2CPINS GCN3_HWI2C_PINS = { 0x28, 0x29 };
-static const I2CPINS GCN3_DDC1_PINS = { 0x00, 0x01 };
-static const I2CPINS GCN3_DDC2_PINS = { 0x02, 0x03 };
-static const I2CPINS GCN3_DDC3_PINS = { 0x04, 0x05 };
-static const I2CPINS GCN3_DDC4_PINS = { 0x41, 0x42 };
-static const I2CPINS GCN3_DDC5_PINS = { 0x48, 0x49 };
-static const I2CPINS GCN3_DDC6_PINS = { 0x4A, 0x4B };
-static const I2CPINS GCN3_DDCVGA_PINS = { 0x4C, 0x4D };
-
-static const I2CPINS GCN3_I2C_BUS_LINES[8] = 
+static const I2CPINS GCN3_I2C_BUS_LINES[8][2] = 
 {
-	GCN3_HWI2C_PINS,
-	GCN3_DDC1_PINS,
-	GCN3_DDC2_PINS,
-	GCN3_DDC3_PINS,
-	GCN3_DDC4_PINS,
-	GCN3_DDC5_PINS,
-	GCN3_DDC6_PINS,
-	GCN3_DDCVGA_PINS
+	{ 0x28, 0x29 },		// HWI2C pins
+	{ 0x00, 0x01 },		// DDC1 pins
+	{ 0x02, 0x03 },		// DDC2 pins
+	{ 0x04, 0x05 },		// DDC3 pins
+	{ 0x41, 0x42 },		// DDC4 pins
+	{ 0x48, 0x49 },		// DDC5 pins
+	{ 0x4A, 0x4B },		// DDC6 pins
+	{ 0x4C, 0x4D }
 };
 
 /*
