@@ -1,0 +1,56 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: build
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Checkout submodules
+      uses: textbook/git-checkout-submodule-action@master
+    - name: Make libpci
+      run: sudo make && sudo make install-lib
+      working-directory: ./pciutils
+    - name: Make wolfamdvolt
+      run: make
+    - name: Zip build artifacts
+      uses: montudor/action-zip@v0.1.0
+      with:
+        args: zip -qq -r ./build.zip wolfamdvolt wolfamdbg
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: build
+        path: build.zip
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.sha }}
+        release_name: Release ${{ github.sha }}
+        draft: true
+        prerelease: false
+    - name: Download artifact for release
+      uses: actions/download-artifact@v2
+      id: download_artifact
+      with:
+        name: build
+        path: ./artifacts
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ steps.download_artifact.outputs.download-path }}/build.zip
+        asset_name: build.zip
+        asset_content_type: application/zip
