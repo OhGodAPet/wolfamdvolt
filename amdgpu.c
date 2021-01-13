@@ -112,6 +112,7 @@ int FindAMDGPUs(AMDGPU **GPUList, HANDLE DrvHandle)
 			CurGPU->MMIOSize = Device->size[5];
 			CurGPU->VendorID = pci_read_word(Device, PCI_VENDOR_ID);
 			CurGPU->DeviceID = pci_read_word(Device, PCI_DEVICE_ID);
+			CurGPU->PCIDomain = Device->domain;
 			CurGPU->PCIBus = Device->bus;
 			CurGPU->PCIDevice = Device->dev;
 			CurGPU->PCIFunction = Device->func;
@@ -259,6 +260,27 @@ int FindAMDGPUs(AMDGPU **GPUList, HANDLE DrvHandle)
 // Returns 0 on success, negative on failure
 int InitAMDGPUMMIO(AMDGPU *GPU)
 {
+	struct pci_access *PCI = NULL;
+	struct pci_dev *Device = NULL;
+
+	PCI = pci_alloc();
+	pci_init(PCI);
+
+	PCI->method = PCI_ACCESS_SYS_BUS_PCI;
+
+	Device = pci_get_dev(PCI, GPU->PCIDomain, GPU->PCIBus, GPU->PCIDevice, GPU->PCIFunction);
+	if (Device)
+	{
+		uint16_t cmd_state = pci_read_word(Device, PCI_COMMAND);
+		if (0 == (cmd_state & PCI_COMMAND_MEMORY))
+		{
+			//No application or driver enabled PCI memory space for this device yet. Enable it now.
+			pci_write_word(Device, PCI_COMMAND, cmd_state | PCI_COMMAND_MEMORY);
+		}
+		pci_free_dev(Device);
+	}
+	pci_cleanup(PCI);
+
 	if(GPU->MMIOBasePtr) return(0);		// Check if already initialized
 	
 	GPU->fd = open("/dev/mem", O_RDWR | O_SYNC);
