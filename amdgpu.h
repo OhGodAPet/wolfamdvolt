@@ -63,6 +63,7 @@ struct _AMDGPU
 	uint32_t MMIOBaseAddr, MMIOSize, VRMCount;
 	uint8_t Revision, I2CAddress, I2CLine, I2CControlOffset;
 	uint16_t VendorID, DeviceID, SubVendor, SubDevice, PCIBus, PCIDevice, PCISlot, PCIFunction;
+	int PCIDomain;
 	struct _AMDGPU *next, *prev;
 };
 
